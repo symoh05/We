@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sliding Ad Banner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="banner-container" id="banner-container">
+    <div class="banner-track">
+      <div class="banner-slide"><img src="ad1.jpg" alt="Ad 1"></div>
+      <div class="banner-slide"><img src="ad2.jpg" alt="Ad 2"></div>
+      <div class="banner-slide"><img src="ad3.jpg" alt="Ad 3"></div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+/* Container for the banner */
+.banner-container {
+  width: 100%;
+  max-width: 380px; /* Matching the width from your image */
+  height: 200px; /* Approximate height based on shared image */
+  overflow: hidden;
+  margin: auto;
+  position: relative;
+  touch-action: pan-x; /* Enables horizontal touch gestures */
+  border-radius: 10px; /* Smooth edges, optional */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Optional shadow for style */
+}
+
+/* Track to hold the slides */
+.banner-track {
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Individual slide */
+.banner-slide {
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+.banner-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures images fit properly */
+}
+
+
+
+
+
+
+
+const bannerTrack = document.querySelector('.banner-track');
+let startX = 0;
+let currentX = 0;
+let moveX = 0;
+let index = 0;
+let autoSlideInterval;
+
+// Start Touch Event
+bannerTrack.addEventListener('touchstart', (e) => {
+  clearInterval(autoSlideInterval); // Pause auto-slide on touch
+  startX = e.touches[0].clientX; // Get initial touch position
+  bannerTrack.style.transition = 'none'; // Disable smooth transition during swipe
+});
+
+// Move Touch Event
+bannerTrack.addEventListener('touchmove', (e) => {
+  currentX = e.touches[0].clientX; // Get current touch position
+  moveX = currentX - startX; // Calculate movement distance
+  bannerTrack.style.transform = `translateX(${-index * 100 + (moveX / bannerTrack.offsetWidth) * 100}%)`;
+});
+
+// End Touch Event
+bannerTrack.addEventListener('touchend', () => {
+  if (moveX > 50) {
+    // Swipe Right
+    index = Math.max(index - 1, 0);
+  } else if (moveX < -50) {
+    // Swipe Left
+    index = Math.min(index + 1, bannerTrack.children.length - 1);
+  }
+
+  bannerTrack.style.transition = 'transform 0.3s ease-in-out';
+  bannerTrack.style.transform = `translateX(-${index * 100}%)`;
+
+  resetAutoSlide(); // Restart auto-slide after manual swipe
+
+  // Reset touch variables
+  startX = 0;
+  currentX = 0;
+  moveX = 0;
+});
+
+// Automatic Slide Function
+function autoSlide() {
+  index = (index + 1) % bannerTrack.children.length; // Loop back to the first slide
+  bannerTrack.style.transition = 'transform 0.5s ease-in-out';
+  bannerTrack.style.transform = `translateX(-${index * 100}%)`;
+}
+
+// Start Auto Slide
+function startAutoSlide() {
+  autoSlideInterval = setInterval(autoSlide, 3000); // Slide every 3 seconds
+}
+
+// Reset Auto Slide
+function resetAutoSlide() {
+  clearInterval(autoSlideInterval);
+  startAutoSlide();
+}
+
+// Initialize Auto Slide
+startAutoSlide();
